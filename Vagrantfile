@@ -1,9 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 PUBLIC_KEY_PATH = "#{Dir.home}/.ssh/id_rsa_vagrant.pub"
-GCCURL="https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-linux-gnu"
-GCC="gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu"
-ARCH=.tar.xz
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/bionic64" # Какую используем сборку Linux
   config.vm.box_check_update = false  # Отключаем проверку обновления сборки
