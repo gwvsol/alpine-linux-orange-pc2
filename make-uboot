@@ -1,0 +1,15 @@
+#!/bin/bash
+BOARD="orangepi_pc2_defconfig"
+UBOOT="https://gitlab.denx.de/u-boot/u-boot.git"
+URL_BL31="https://github.com/ARM-software/arm-trusted-firmware.git"
+DATE=$(date +'%d-%m-%Y-%H-%M-%S')
+WORK_DIR="${HOME}/work"
+OUT_DIR="${HOME}/out-$DATE"
+mkdir -p $WORK_DIR $OUT_DIR && cd $WORK_DIR 
+git clone $UBOOT && \
+git clone $URL_BL31 && \
+cd arm-trusted-firmware && \
+make PLAT=sun50i_a64 DEBUG=1 bl31 && \
+export BL31=$(pwd)/build/sun50i_a64/debug/bl31.bin && \
+cd ../u-boot/ && make $BOARD && make && \
+cp u-boot-sunxi-with-spl.bin $OUT_DIR
