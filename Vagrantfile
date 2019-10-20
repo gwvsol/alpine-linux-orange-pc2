@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, :inline => "mv /tmp/aarch64-linux-gnu.sh /etc/profile.d/"
   if Pathname.new(PUBLIC_KEY_PATH).exist?
     config.vm.provision :file, source: PUBLIC_KEY_PATH, destination: '/tmp/id_rsa.pub'
-    config.vm.provision :shell, :inline => "rm -f /home/vagrant/.ssh/authorized_keys && mkdir -p /home/vagrant/.ssh && sudo cp /tmp/id_rsa.pub /home/vagrant/.ssh/authorized_keys"
+    config.vm.provision :shell, :inline => "cat /tmp/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys"
   end
 end
 
