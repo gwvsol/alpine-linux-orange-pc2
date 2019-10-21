@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
     vb.memory = "2048"
     vb.cpus = "2"
   end
-  config.vm.provision :shell, :inline => "export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get -qq -y install git atop gawk wget unzip tzdata sed xz-utils bison flex python2.7 python-dev swig build-essential lzop u-boot-tools libncurses-dev"
+  config.vm.provision :shell, :inline => "export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get -qq -y install git atop gawk wget unzip tzdata sed xz-utils bison flex python2.7 python-dev swig build-essential lzop u-boot-tools libncurses-dev libssl-dev"
   config.vm.provision :shell, :inline => "export GCCURL='https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-linux-gnu' && export GCC='gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu' && export ARCH='tar.xz' && cd /tmp && wget --no-verbose $GCCURL/$GCC.$ARCH && tar -xJf $GCC.$ARCH && mv $GCC /usr/lib/gcc/aarch64-linux-gnu && rm $GCC.$ARCH"
   config.vm.provision :file, source: MAKE_UBOOT, destination: '/tmp/make-uboot'
   config.vm.provision :file, source: SYNC_CONF, destination: '/tmp/sync.conf'

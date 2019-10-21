@@ -3,7 +3,7 @@ BOARD="orangepi_pc2_defconfig"
 UBOOT="https://gitlab.denx.de/u-boot/u-boot.git"
 URL_BL31="https://github.com/ARM-software/arm-trusted-firmware.git"
 DATE=$(date +'%Y-%m-%d-%H-%M-%S')
-WORK_DIR="${HOME}/work"
+WORK_DIR="${HOME}/uboot-src"
 OUT_DIR="${HOME}/uboot-$DATE"
 if ! [ -d $WORK_DIR ] ; then 
     mkdir -p $WORK_DIR
