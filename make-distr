@@ -123,9 +123,10 @@ kernel () {
     make clean && cp $KERNEL_CONF .config && \
     make oldconfig && \
     #make menuconfig && \
-    export INSTALL_PATH=$DISTR && make Image.gz dtbs zinstall dtbs_install && \
+    export INSTALL_PATH=$DISTR && make Image dtbs install dtbs_install && \
     export INSTALL_MOD_PATH=$DISTR && make modules modules_install
-    cd $DISTR && cp dtbs/$KERNEL_VERSION/allwinner/sun50i-h5-orangepi-pc2.dtb . && cd ..
+    cd $DISTR && cp dtbs/$KERNEL_VERSION/allwinner/sun50i-h5-orangepi-pc2.dtb . && cd .. && \
+    rm -rf dtbs/
 }
 
 fs () {
