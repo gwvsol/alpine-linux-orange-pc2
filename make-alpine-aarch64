@@ -1,0 +1,34 @@
+#!/bin/bash
+ARH="$1"
+SD="$2"
+DATE=$(date +'%Y-%m-%d-%H-%M-%S')
+if [ -z $ARH ] ; then
+	echo "######## Укажите первым параметром архив с дистрибутивом"
+	echo "######## Укажите вторым параметром SD карту на которую будем устанaвливать дистрибутив"
+	exit 1
+fi
+if [ -z $SD ] ; then
+	echo "######## Укажите вторым параметром SD карту на которую будем устанaвливать дистрибутив"
+	exit 1
+fi
+echo $ARH
+echo $SD
+mkdir -p /tmp/$DATE && cp $ARH /tmp/$DATE/ && cd /tmp/$DATE && \
+tar -xvf $(ls | grep tar.gz) && \
+echo "######## Все данные будут удалены с SD карты /dev/$SD"
+TMPFS=$(mount | grep $SD | awk '{print $1}')
+sudo umount $TMPFS
+sudo dd if=/dev/zero of=/dev/$SD bs=4MB status=progress count=200
+echo "######## Выполняем разметку SD карты /dev/$SD"
+sudo parted -s /dev/$SD -- mklabel msdos mkpart primary fat32 2M 100% set 1 boot on
+echo "######## Выполняем форматирование SD карты /dev/$SD"
+sudo mkfs.vfat $TMPFS
+echo "######## Записываем загрузщик UBOOT на SD карту /dev/$SD"
+sudo dd if=$(ls | grep bin) of=/dev/$SD  bs=1024 seek=8
+sleep 10
+echo "######## Копируем файлы системы на SD карту /dev/$SD"
+cp -a apks/ boot/ $(mount | grep sdc | awk '{print $3}')
+sleep 5
+umount $(mount | grep sdc | awk '{print $3}')
+echo "######## Установка системы на SD карту завершена /dev/$SD"
+cd .. && rm -rf $DATE

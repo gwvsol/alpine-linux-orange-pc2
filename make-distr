@@ -1,0 +1,197 @@
+#!/bin/bash
+###############################
+NAME="make-distr"
+###############################
+export DEBIAN_FRONTEND=noninteractive
+DATE=$(date +'%Y-%m-%d-%H-%M-%S')
+WORK_DIR="/var/data"
+DISTR="$WORK_DIR/alpine-aarch64"
+TEMP="/tmp/alpine"
+GLOBAL_ENV="/etc/profile.d/aarch64-linux-musl.sh"
+CONF_ENV="$WORK_DIR/conf/aarch64-linux-musl.sh"
+###############################
+BOARD="orangepi_pc2_defconfig"
+UBOOT_GIT="https://gitlab.denx.de/u-boot/u-boot.git"
+UBOOT_BL31_GIT="https://github.com/ARM-software/arm-trusted-firmware.git"
+UBOOT_BL31_SRC=".arm-trusted-firmware"
+UBOOT_SRC=".uboot-src"
+###############################
+MUSL_GIT="https://github.com/richfelker/musl-cross-make.git"
+MUSL_TOOLS="/usr/lib/gcc/musl-aarch64-linux-gnu"
+MUSL_DIR=".musl-gcc"
+MUSL_AARCH="aarch64-linux-musl-"
+MUSL_CONF="config.mak"
+###############################
+KERNEL_URL="https://cdn.kernel.org/pub/linux/kernel/"
+KERNEL_BRANCH="v4.x"
+KERNEL_VERSION="4.19.80"
+KERNEL="$KERNEL_URL/$KERNEL_BRANCH/linux-$KERNEL_VERSION.tar.xz"
+KERNEL_CONF="$WORK_DIR/conf/config-kelnel"
+###############################
+ALPINE_V="3.10"
+ALPINE_C="3"
+ALPINE_URL="http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_V/releases/aarch64/alpine-uboot-$ALPINE_V.$ALPINE_C-aarch64.tar.gz"
+###############################
+
+mkdir -p $TEMP
+
+env () {
+    echo "####### Переменные окружения и установленными компиляторы"
+    if [ -d $MUSL_TOOLS ] ; then
+        echo "####### Компилятор Musl в системе установлен"
+        echo "####### $MUSL_TOOLS"
+        if [ $CROSS_COMPILE = $MUSL_AARCH ] ; then
+            echo "ARCH=$ARCH"
+            echo "CROSS_COMPILE=$CROSS_COMPILE"
+            echo "PATH=$PATH"
+        fi
+    else
+        echo "####### Компилятор Musl в системе не установлен"
+    fi
+}
+################################
+
+set () {
+    if [ -d $MUSL_TOOLS ] ; then
+        echo "####### Компилятор Musl в системе установлен"
+    else
+        cd $WORK_DIR 
+        if [ -d $MUSL_DIR ] ; then
+            cd $MUSL_DIR && make clean && git pull
+        else
+            git clone $MUSL_GIT $MUSL_DIR && cd $MUSL_DIR
+        fi
+        GROUP=${USER}
+        sudo mkdir $MUSL_TOOLS && sudo chown ${USER}:$GROUP $MUSL_TOOLS
+        :> $MUSL_CONF
+        echo "TARGET = aarch64-linux-musl" >> $MUSL_CONF
+        echo "OUTPUT = $MUSL_TOOLS" >> $MUSL_CONF
+        echo "DL_CMD = wget -c -O" >> $MUSL_CONF
+        echo 'COMMON_CONFIG += CFLAGS="-g0 -Os" CXXFLAGS="-g0 -Os" LDFLAGS="-s"' >> $MUSL_CONF
+        make && make install
+    fi
+    echo "####### $MUSL_TOOLS"
+    if ! [ -f $GLOBAL_ENV ] ; then
+        echo "####### Устанавливаем переменные окружения для работы компилятора Musl"
+        :> $CONF_ENV
+        echo "export ARCH=$ARCH" >> $CONF_ENV
+        echo "export CROSS_COMPILE=$MUSL_AARCH" >> $CONF_ENV
+        echo "export PATH=$MUSL_TOOLS/bin:\$PATH" >> $CONF_ENV
+        sudo cp $CONF_ENV $GLOBAL_ENV
+        echo "####### Переменные для работы компилятора Musl установлены"
+        echo "####### Для применения глобальных настроект необходима перезагрузка системы"
+    else
+        echo "####### Глобальные переменные для компилятора"
+        echo "ARCH=$ARCH"
+        echo "CROSS_COMPILE=$CROSS_COMPILE"
+        echo "PATH=$PATH"
+    fi
+}
+#######################################
+
+uboot () {
+    source $CONF_ENV
+    cd $WORK_DIR
+    if ! [ -d $UBOOT_SRC ] ; then
+        git clone $UBOOT_GIT $UBOOT_SRC
+    else cd $UBOOT_SRC && make clean && git pull && cd ..
+    fi
+    if ! [ -d $UBOOT_BL31_SRC ] ; then
+        git clone $UBOOT_BL31_GIT $UBOOT_BL31_SRC
+    else cd $UBOOT_BL31_SRC && make clean && git pull && cd ..
+    fi
+    cd $UBOOT_BL31_SRC && \
+    make PLAT=sun50i_a64 DEBUG=1 bl31 && \
+    export BL31=$(pwd)/build/sun50i_a64/debug/bl31.bin && cd $WORK_DIR && \
+    cd $UBOOT_SRC && make $BOARD && make
+    if ! [ -d $DISTR ] ; then
+        mkdir -p $DISTR
+    fi
+    cp u-boot-sunxi-with-spl.bin $DISTR/u-boot-$DATE.bin
+    cd $WORK_DIR
+}
+#######################################
+
+kernel () {
+    cd $WORK_DIR
+    if ! [ -d linux-$KERNEL_VERSION ] ; then
+        wget $KERNEL && \
+        tar -xJvf linux-$KERNEL_VERSION.tar.xz && \
+        rm -rf linux-$KERNEL_VERSION.tar.xz
+    fi
+    cd linux-$KERNEL_VERSION && \
+    make clean && cp $KERNEL_CONF .config && \
+    make oldconfig && \
+    #make menuconfig && \
+    export INSTALL_PATH=$DISTR && make Image.gz dtbs zinstall dtbs_install && \
+    export INSTALL_MOD_PATH=$DISTR && make modules modules_install
+    cd $DISTR && cp dtbs/$KERNEL_VERSION/allwinner/sun50i-h5-orangepi-pc2.dtb . && cd ..
+}
+
+fs () {
+    cd $TEMP && mkdir tmp && \
+    wget $ALPINE_URL && \
+    tar -xf alpine-uboot-$ALPINE_V.$ALPINE_C-aarch64.tar.gz -C tmp/ && \
+    mv tmp/boot/initramfs* tmp/boot/modloop* . && mv tmp/apks $DISTR/ && rm -rf tmp alpine* && \
+    mkdir -p new modloop modloop-new/modules && cd new && gunzip -c ../initramfs-* | cpio -i && \
+    rm -rf lib/modules/* && cp -a $DISTR/lib/modules/* lib/modules/ && \
+    find . | cpio -H newc -o | gzip -9 > ../initramfs-new && cd .. && \
+    mkimage -n initramfs-new -A arm64 -O linux -T ramdisk -C none -d initramfs-new $DISTR/alpine-aarch64-initramfs && \
+    sudo mount -o loop -t squashfs modloop-vanilla modloop && \
+    cp -a modloop/modules/firmware modloop-new/modules/ && cp -a $DISTR/lib/modules/* modloop-new/modules/ && \
+    mksquashfs modloop-new/ $DISTR/alpine-aarch64-modloop -b 1048576 -comp xz -Xdict-size 100%
+    sudo umount modloop && cd $DISTR && :> boot.cmd && \
+    echo "setenv fdt_high ffffffff" >> boot.cmd
+    echo "setenv machid 1029" >> boot.cmd
+    echo "setenv bootargs earlyprintk /boot/$(ls | grep vmlinuz) modules=loop,squashfs,sd-mod,usb-storage modloop=/boot/$(ls | grep modloop) console=\${console}" >> boot.cmd
+    echo "load mmc 0:1 0x43000000 boot/dtbs/$(ls | grep pc2.dtb)" >> boot.cmd
+    echo "load mmc 0:1 0x41000000 boot/$(ls | grep vmlinuz)" >> boot.cmd
+    echo "load mmc 0:1 0x45000000 boot/$(ls | grep initramfs)" >> boot.cmd
+    echo "booti 0x41000000 0x45000000 0x43000000" >> boot.cmd
+    mkimage -C none -A arm64 -T script -d boot.cmd boot.scr
+    mkdir -p boot/dtbs && cp -a $(ls | grep cmd) \
+    $(ls | grep scr) $(ls | grep $KERNEL_VERSION) \
+    $(ls | grep aarch64) boot/ && cp -a $(ls | grep pc2.dtb) boot/dtbs/ && \
+    tar -cvzf alpine-orangepi-pc2-$ALPINE_V.$ALPINE_C-aarch64.tar.gz apks/ boot/ $(ls | grep u-boot) && \
+    rm -rf apks/ boot/ && \
+    echo "######### Создан дистрибутив alpine-orangepi-pc2 $(ls | grep tar.gz)"
+}
+
+case $1 in
+    "set" )
+        set
+    ;;
+    "env" )
+        env
+    ;;
+    "uboot" )
+        uboot
+    ;;
+    "kernel" )
+        kernel
+    ;;
+    "fs" )
+        fs
+    ;;
+    "all" )
+        uboot
+        sleep 10
+        kernel
+        sleep 10
+        fs
+        sleep 10
+    ;;
+    "help" )
+        echo "###### - Получить переменные окружения и установленными компиляторы: $NAME env"
+        echo "###### - Сборка и настройка компилятора Musl: $NAME set"
+        echo "###### - Сборка загрузщика U-BOOT для $BOARD: $NAME uboot"
+        echo "###### - Сборка ядра Linux для $BOARD: $NAME kernel"
+        echo "###### - Сборка initramfs и modloop для $BOARD: $NAME fs"
+        echo "###### - Полная сборка UBOOT, Kernel, initramfs и modloop для $BOARD: $NAME all"
+    ;;
+    * )
+        echo "###### - Работа со скриптом сборки $NAME" help
+    ;;
+esac
+
+rm -rf $TEMP
