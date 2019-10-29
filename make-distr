@@ -4,7 +4,7 @@ NAME="make-distr"
 ###############################
 export DEBIAN_FRONTEND=noninteractive
 DATE=$(date +'%Y-%m-%d-%H-%M-%S')
-WORK_DIR="/var/data"
+WORK_DIR="/home/vagrant"
 DISTR="$WORK_DIR/alpine-aarch64"
 TEMP="/tmp/alpine"
 GLOBAL_ENV="/etc/profile.d/aarch64-linux-musl.sh"
@@ -26,7 +26,7 @@ KERNEL_URL="https://cdn.kernel.org/pub/linux/kernel/"
 KERNEL_BRANCH="v4.x"
 KERNEL_VERSION="4.19.80"
 KERNEL="$KERNEL_URL/$KERNEL_BRANCH/linux-$KERNEL_VERSION.tar.xz"
-KERNEL_CONF="$WORK_DIR/conf/config-kelnel"
+KERNEL_CONF="$WORK_DIR/conf/config-$KERNEL_VERSION"
 ###############################
 ALPINE_V="3.10"
 ALPINE_C="3"
@@ -36,18 +36,20 @@ ALPINE_URL="http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_V/releases/aarch64/alp
 mkdir -p $TEMP
 
 env () {
-    echo "####### Переменные окружения и установленными компиляторы"
-    if [ -d $MUSL_TOOLS ] ; then
-        echo "####### Компилятор Musl в системе установлен"
-        echo "####### $MUSL_TOOLS"
-        if [ $CROSS_COMPILE = $MUSL_AARCH ] ; then
-            echo "ARCH=$ARCH"
-            echo "CROSS_COMPILE=$CROSS_COMPILE"
-            echo "PATH=$PATH"
-        fi
-    else
+    echo "####### Переменные окружения и установленные компиляторы"
+    if ! [ -d $MUSL_TOOLS ] ; then
         echo "####### Компилятор Musl в системе не установлен"
+        exit 1
     fi
+    if ! [ $CROSS_COMPILE = $MUSL_AARCH ] ; then
+        echo "####### Компилятор Musl в системе не установлен"
+        exit 1
+    fi
+    echo "####### Компилятор Musl в системе установлен"
+    echo "####### $MUSL_TOOLS"
+    echo "####### ARCH=$ARCH"
+    echo "####### CROSS_COMPILE=$CROSS_COMPILE"
+    echo "####### PATH=$PATH"
 }
 ################################
 
@@ -90,7 +92,6 @@ set () {
 #######################################
 
 uboot () {
-    source $CONF_ENV
     cd $WORK_DIR
     if ! [ -d $UBOOT_SRC ] ; then
         git clone $UBOOT_GIT $UBOOT_SRC
