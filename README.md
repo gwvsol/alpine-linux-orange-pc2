@@ -2,6 +2,8 @@
 
 Создание Alpine Linux для Orange PI PC2
 
+Релиз Alpine Linux [3.10.3](https://github.com/gwvsol/Alpine-Linux-Orange-PC2/releases/tag/v3.10.3) для Orange PI PC2
+
 ***
 
 ### Краткое описание
