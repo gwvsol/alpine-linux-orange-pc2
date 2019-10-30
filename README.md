@@ -10,7 +10,7 @@
 
 В качестве компилятора используется [Musl Cross Compiler](https://wiki.musl-libc.org/getting-started.html) - [GitHub](https://github.com/richfelker/musl-cross-make)
 
-Для развертывания системы сборки используется [Virtual Box](https://www.virtualbox.org/wiki/Linux_Downloads) и [Vagrant](https://help.ubuntu.ru/wiki/vagrant). Создан Vagrantfile и набор скриптов для сборки [Alpine Linux](https://alpinelinux.org/). На созданной виртуальной машине используется [Ubuntu 18.04 LTS (Bionic Beaver)](http://releases.ubuntu.com/18.04/)
+Для развертывания системы сборки используется [Virtual Box](https://www.virtualbox.org/wiki/Linux_Downloads) и [Vagrant](https://help.ubuntu.ru/wiki/vagrant). Создан Vagrantfile и набор скриптов для сборки [Alpine Linux](https://alpinelinux.org/). На виртуальной машине используется [Ubuntu 18.04 LTS (Bionic Beaver)](http://releases.ubuntu.com/18.04/)
 
 Во время развертывания виртуальной машины устанавливаются все необходимые пакеты, копируется скрипт для сборки ```make-distr```, файл ```aarch64-linux-musl.sh```, для установки переменных окружения компилятора ```Musl Cross Compiler``` и ```config-4.19.80``` для настройки ядра перед его сборкой. Компилятор ```Musl Cross Compiler``` для сборки загрузщика Uboot и ядра Linux не устанавливается, его необходимо будет собрать из исходников перед началом сборки Alpine Linux. Так же имеется скрипит ```make-alpine-aarch64``` упрощающий установку дистрибутива на SD карту
 
@@ -120,6 +120,7 @@ drwxrwxr-x 3 vagrant vagrant      4096 Oct 29 18:49 lib
 work@work:~$ ./make-alpine-aarch64 
 ######## Укажите первым параметром архив с дистрибутивом
 ######## Укажите вторым параметром SD карту на которую будем устанaвливать дистрибутив
+######## Второй параметр указывается в формате sdX
 ```
 После чего SD карту можно установить в ```Orange Pi PC2``` и завершить установку Alpine Linux
 ````shell
