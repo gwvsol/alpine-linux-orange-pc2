@@ -17,6 +17,8 @@ ALPINE LINUX [3.11.2](https://alpinelinux.org/posts/Alpine-3.11.2-released.html)
 
 Во время развертывания виртуальной машины устанавливаются все необходимые пакеты, копируется скрипт для сборки ```make-distr```, файл ```aarch64-linux-musl.sh```, для установки переменных окружения компилятора ```Musl Cross Compiler``` и ```config-4.19.91``` для настройки ядра перед его сборкой. Компилятор ```Musl Cross Compiler``` для сборки загрузщика Uboot и ядра Linux не устанавливается, его необходимо будет собрать из исходников перед началом сборки Alpine Linux. Так же имеется скрипит ```make-alpine-aarch64``` упрощающий установку дистрибутива на SD карту
 
+Иногда при развертывании виртуальной машины возникает ошибка ```Vagrant: * Unknown configuration section 'disksize'```. Для устранения ошибки ```vagrant plugin install vagrant-disksize```
+
 ### Что необходимо для сборки
 * Исходный код загрузщика [u-boot](https://gitlab.denx.de/u-boot/u-boot.git)
 * [Trusted Firmware-A](https://github.com/ARM-software/arm-trusted-firmware)

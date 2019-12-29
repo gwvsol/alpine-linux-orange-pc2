@@ -17,10 +17,10 @@ Vagrant.configure("2") do |config|
     vb.cpus = "2"
   end
   config.vm.provision :shell, :inline => "export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get -qq -y install git atop gawk wget unzip tzdata sed xz-utils bison flex python2.7 python-dev python-setuptools swig build-essential lzop u-boot-tools libncurses-dev libssl-dev python3-setuptools python3-dev"
-  config.vm.provision :file, source: CONF_KERNELL , destination: '/tmp/config-4.19.80'
+  config.vm.provision :file, source: CONF_KERNELL , destination: '/tmp/config-4.19.91'
   config.vm.provision :file, source: MAKE_DISTR, destination: '/tmp/make-distr'
   config.vm.provision :file, source: CONF_ENV, destination: '/tmp/aarch64-linux-musl.sh'
-  config.vm.provision :shell, :inline => "mkdir -p /home/vagrant/conf && mv /tmp/config-4.19.80 /home/vagrant/conf/ && chmod +x /tmp/make-distr && mv /tmp/make-distr /home/vagrant/conf/ && chown -R vagrant:vagrant /home/vagrant/conf && mv /tmp/aarch64-linux-musl.sh /etc/profile.d/ && ln -s /home/vagrant/conf/make-distr /usr/local/bin/"
+  config.vm.provision :shell, :inline => "mkdir -p /home/vagrant/conf && mv /tmp/config-4.19.91 /home/vagrant/conf/ && chmod +x /tmp/make-distr && mv /tmp/make-distr /home/vagrant/conf/ && chown -R vagrant:vagrant /home/vagrant/conf && mv /tmp/aarch64-linux-musl.sh /etc/profile.d/ && ln -s /home/vagrant/conf/make-distr /usr/local/bin/"
   if Pathname.new(PUBLIC_KEY_PATH).exist?
     config.vm.provision :file, source: PUBLIC_KEY_PATH, destination: '/tmp/id_rsa.pub'
     config.vm.provision :shell, :inline => "cat /tmp/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys"
