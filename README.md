@@ -158,10 +158,10 @@ work@work:~$ ./make-alpine-aarch64
 ```
 После чего SD карту можно установить в ```Orange Pi PC2``` и завершить установку Alpine Linux
 ````shell
-Welcome to Alpine Linux 3.10
-Kernel 4.19.80 on an aarch64 (/dev/ttyS0)
+Welcome to Alpine Linux 3.11
+Kernel 4.19.91 on an aarch64 (/dev/ttyS0)
 
-tvhost login: root
+pc2 login: root
 Password: 
 Welcome to Alpine!
 
@@ -174,19 +174,28 @@ You can setup the system with the command: setup-alpine
 You may change this message by editing /etc/motd.
 
 tvhost:~# lscpu
-Architecture:        aarch64
-Byte Order:          Little Endian
-CPU(s):              4
-On-line CPU(s) list: 0-3
-Thread(s) per core:  1
-Core(s) per socket:  4
-Socket(s):           1
-NUMA node(s):        1
-Vendor ID:           ARM
-Model:               4
-Model name:          Cortex-A53
-Stepping:            r0p4
-BogoMIPS:            48.00
-NUMA node0 CPU(s):   0-3
-Flags:               fp asimd evtstrm aes pmull sha1 sha2 crc32 cpuid
+Architecture:                    aarch64
+CPU op-mode(s):                  32-bit, 64-bit
+Byte Order:                      Little Endian
+CPU(s):                          4
+On-line CPU(s) list:             0-3
+Thread(s) per core:              1
+Core(s) per socket:              4
+Socket(s):                       1
+NUMA node(s):                    1
+Vendor ID:                       ARM
+Model:                           4
+Model name:                      Cortex-A53
+Stepping:                        r0p4
+BogoMIPS:                        48.00
+NUMA node0 CPU(s):               0-3
+Vulnerability Itlb multihit:     Not affected
+Vulnerability L1tf:              Not affected
+Vulnerability Mds:               Not affected
+Vulnerability Meltdown:          Not affected
+Vulnerability Spec store bypass: Not affected
+Vulnerability Spectre v1:        Mitigation; __user pointer sanitization
+Vulnerability Spectre v2:        Not affected
+Vulnerability Tsx async abort:   Not affected
+Flags:                           fp asimd evtstrm aes pmull sha1 sha2 crc32 cpui
 ````
