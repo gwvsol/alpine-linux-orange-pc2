@@ -29,8 +29,8 @@ echo "######## Записываем загрузщик UBOOT на SD карту 
 sudo dd if=$(ls | grep bin) of=/dev/$SD  bs=1024 seek=8
 sleep 10
 echo "######## Копируем файлы системы на SD карту /dev/$SD"
-cp -a apks/ boot/ $(mount | grep sdc | awk '{print $3}')
+cp -a apks/ boot/ $(mount | grep $SD | awk '{print $3}')
 sleep 5
-umount $(mount | grep sdc | awk '{print $3}')
+umount $(mount | grep $SD | awk '{print $3}')
 echo "######## Установка системы на SD карту завершена /dev/$SD"
 cd .. && rm -rf $DATE

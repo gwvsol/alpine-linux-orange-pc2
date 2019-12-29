@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 PUBLIC_KEY_PATH = "#{Dir.home}/.ssh/id_rsa_vagrant.pub"
-CONF_KERNELL = "config-4.19.80"
+CONF_KERNELL = "config-4.19.91"
 MAKE_DISTR = "make-distr"
 CONF_ENV = "aarch64-linux-musl.sh"
 Vagrant.configure("2") do |config|
@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
     vb.memory = "2048"
     vb.cpus = "2"
   end
-  config.vm.provision :shell, :inline => "export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get -qq -y install git atop gawk wget unzip tzdata sed xz-utils bison flex python2.7 python-dev swig build-essential lzop u-boot-tools libncurses-dev libssl-dev"
+  config.vm.provision :shell, :inline => "export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get -qq -y install git atop gawk wget unzip tzdata sed xz-utils bison flex python2.7 python-dev python-setuptools swig build-essential lzop u-boot-tools libncurses-dev libssl-dev python3-setuptools python3-dev"
   config.vm.provision :file, source: CONF_KERNELL , destination: '/tmp/config-4.19.80'
   config.vm.provision :file, source: MAKE_DISTR, destination: '/tmp/make-distr'
   config.vm.provision :file, source: CONF_ENV, destination: '/tmp/aarch64-linux-musl.sh'

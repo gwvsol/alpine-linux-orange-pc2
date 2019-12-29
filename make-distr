@@ -24,12 +24,12 @@ MUSL_CONF="config.mak"
 ###############################
 KERNEL_URL="https://cdn.kernel.org/pub/linux/kernel/"
 KERNEL_BRANCH="v4.x"
-KERNEL_VERSION="4.19.80"
+KERNEL_VERSION="4.19.91"
 KERNEL="$KERNEL_URL/$KERNEL_BRANCH/linux-$KERNEL_VERSION.tar.xz"
 KERNEL_CONF="$WORK_DIR/conf/config-$KERNEL_VERSION"
 ###############################
-ALPINE_V="3.10"
-ALPINE_C="3"
+ALPINE_V="3.11"
+ALPINE_C="2"
 ALPINE_URL="http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_V/releases/aarch64/alpine-uboot-$ALPINE_V.$ALPINE_C-aarch64.tar.gz"
 ###############################
 
@@ -131,17 +131,17 @@ kernel () {
 }
 
 fs () {
-    cd $TEMP && mkdir tmp && \
+    cd $TEMP && mkdir mkdir -p {tmp,new,modloop,tmp-modloop/modules} && \
     wget $ALPINE_URL && \
     tar -xf alpine-uboot-$ALPINE_V.$ALPINE_C-aarch64.tar.gz -C tmp/ && \
-    mv tmp/boot/initramfs* tmp/boot/modloop* . && mv tmp/apks $DISTR/ && rm -rf tmp alpine* && \
-    mkdir -p new modloop modloop-new/modules && cd new && gunzip -c ../initramfs-* | cpio -i && \
+    cp -a tmp/boot/initramfs* $TEMP/ cp -a tmp/boot/modloop* $TEMP/ && cp -a tmp/apks $DISTR/ && \
+    cd new && gunzip -c ../initramfs-* | cpio -i && \
     rm -rf lib/modules/* && cp -a $DISTR/lib/modules/* lib/modules/ && \
     find . | cpio -H newc -o | gzip -9 > ../initramfs-new && cd .. && \
     mkimage -n initramfs-new -A arm64 -O linux -T ramdisk -C none -d initramfs-new $DISTR/alpine-aarch64-initramfs && \
-    sudo mount -o loop -t squashfs modloop-vanilla modloop && \
-    cp -a modloop/modules/firmware modloop-new/modules/ && cp -a $DISTR/lib/modules/* modloop-new/modules/ && \
-    mksquashfs modloop-new/ $DISTR/alpine-aarch64-modloop -b 1048576 -comp xz -Xdict-size 100%
+    sudo mount -o loop -t squashfs $(ls | grep modloop-) modloop && \
+    cp -a modloop/modules/firmware tmp-modloop/modules/ && cp -a $DISTR/lib/modules/* tmp-modloop/modules/ && \
+    mksquashfs tmp-modloop/ $DISTR/alpine-aarch64-modloop -b 1048576 -comp xz -Xdict-size 100%
     sudo umount modloop && cd $DISTR && :> boot.cmd && \
     echo "setenv fdt_high ffffffff" >> boot.cmd
     echo "setenv machid 1029" >> boot.cmd
