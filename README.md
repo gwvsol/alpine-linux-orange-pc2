@@ -14,7 +14,7 @@
 
 Для развертывания системы сборки используется [Virtual Box](https://www.virtualbox.org/wiki/Linux_Downloads) и [Vagrant](https://help.ubuntu.ru/wiki/vagrant). Создан Vagrantfile и набор скриптов для сборки [Alpine Linux](https://alpinelinux.org/). На виртуальной машине используется [Ubuntu 18.04 LTS (Bionic Beaver)](http://releases.ubuntu.com/18.04/)
 
-Во время развертывания виртуальной машины устанавливаются все необходимые пакеты, копируется скрипт для сборки ```make-distr```, файл ```aarch64-linux-musl.sh```, для установки переменных окружения компилятора ```Musl Cross Compiler``` и ```config-4.19.80``` для настройки ядра перед его сборкой. Компилятор ```Musl Cross Compiler``` для сборки загрузщика Uboot и ядра Linux не устанавливается, его необходимо будет собрать из исходников перед началом сборки Alpine Linux. Так же имеется скрипит ```make-alpine-aarch64``` упрощающий установку дистрибутива на SD карту
+Во время развертывания виртуальной машины устанавливаются все необходимые пакеты, копируется скрипт для сборки ```make-distr```, файл ```aarch64-linux-musl.sh```, для установки переменных окружения компилятора ```Musl Cross Compiler``` и ```config-4.19.91``` для настройки ядра перед его сборкой. Компилятор ```Musl Cross Compiler``` для сборки загрузщика Uboot и ядра Linux не устанавливается, его необходимо будет собрать из исходников перед началом сборки Alpine Linux. Так же имеется скрипит ```make-alpine-aarch64``` упрощающий установку дистрибутива на SD карту
 
 ### Что необходимо для сборки
 * Исходный код загрузщика [u-boot](https://gitlab.denx.de/u-boot/u-boot.git)
@@ -23,7 +23,7 @@
 * Исходный код ядра [Linux](https://cdn.kernel.org/pub/linux/kernel/)
 * Файлы ```initramfs``` и ```modloop``` из Alpine Linux - [Generic ARM Aarch64](https://alpinelinux.org/downloads/)
 
-На момент написания ```README``` версия ядра Linux (LTS) - ```4.19.80``` и версия Alpine Linux - ```3.10.3```
+На момент написания ```README``` версия ядра Linux (LTS) - ```4.19.91``` и версия Alpine Linux - ```3.11.2```
 
 ### Подготовка к сборке
 
@@ -33,7 +33,7 @@ git clone https://github.com/gwvsol/Alpine-Linux-Orange-PC2.git
 cd Alpine-Linux-Orange-PC2
 
 -rw-r--r-- 1 work work    116 окт 29 12:06 aarch64-linux-musl.sh
--rw-r--r-- 1 work work 151902 окт 29 12:11 config-4.19.80
+-rw-r--r-- 1 work work 151902 окт 29 12:11 config-4.19.91
 -rwxr-xr-x 1 work work   1630 окт 29 12:06 make-alpine-aarch64
 -rwxr-xr-x 1 work work   7941 окт 29 19:05 make-distr
 -rw-r--r-- 1 work work   1274 окт 29 12:06 README.md
@@ -48,6 +48,38 @@ cd Alpine-Linux-Orange-PC2
 #### Сборка Alpine Linux
 
 Далее все действия происходят внутри работающей виртуальной машины
+
+Если необходимо собрать версию ядра отличающегося от ядра от ```4.19.91``` неоходимо внести измения в файл ```make-distr``` в переменные
+
+```shell
+KERNEL_BRANCH="v4.x"
+KERNEL_VERSION="4.19.91"
+....
+ALPINE_V="3.11"
+ALPINE_C="2"
+```
+а так же при необходимости раскомментировать строку ```#make menuconfig```
+
+После чего вручную скачать исходники ядра и создать новый файл ```.config``` 
+
+```shell
+tar -xJvf linux-KERNEL_VERSION.tar.xz
+cd linux-KERNEL_VERSION
+make clean && cp KERNEL_CONF .config
+make oldconfig
+make menuconfig
+```
+
+Так же необходимо проверить чтобы были сохранены настройки:
+```shell
+"File systems" -> "Miscellaneous file systems" -> "Squashed filesystem"
+"Device drivers" -> "Block devices" -> "Loopback device support"
+"[*]Enable loadable module support" ->
+"Device Drivers" -> "Graphics support" -> "Frame buffer Devices" -> "[*]support for frame buffer devices" -> "[*]Simple framebuffer support"
+"Device Drivers" -> "Graphics support" -> "Console display driver support" -> "[*]Framebuffer Console support"
+```
+
+После чего сохранить настройки и при необходимости скопировать файл ```.config``` в директорию ```~/conf``` c новым именем файла соответствующим версии ядра
 
 ````shell
 vagrant@VM06-Alpine-for-OrangePC2:~$ make-distr 
@@ -98,26 +130,26 @@ vagrant@VM06-Alpine-for-OrangePC2:~$ ls -l
 total 12
 drwxrwxr-x  4 vagrant vagrant 4096 Oct 29 18:50 alpine-aarch64
 drwxr-xr-x  2 vagrant vagrant 4096 Oct 29 18:01 conf
-drwxrwxr-x 26 vagrant vagrant 4096 Oct 29 18:44 linux-4.19.80
+drwxrwxr-x 26 vagrant vagrant 4096 Oct 29 18:44 linux-4.19.91
 ```
 В директории ```alpine-aarch64``` будет находится результат нашей сборки
 ```shell
 vagrant@VM06-Alpine-for-OrangePC2:~/alpine-aarch64$ ls -l
 total 198668
--rw-rw-r-- 1 vagrant vagrant   3043842 Oct 29 18:19 System.map-4.19.80
+-rw-rw-r-- 1 vagrant vagrant   3043842 Oct 29 18:19 System.map-4.19.91
 -rw-rw-r-- 1 vagrant vagrant  31696603 Oct 29 18:50 alpine-aarch64-initramfs
 -rw-r--r-- 1 vagrant vagrant  51867648 Oct 29 18:50 alpine-aarch64-modloop
--rw-rw-r-- 1 vagrant vagrant 101867460 Oct 29 18:50 alpine-orangepi-pc2-3.10.3-aarch64.tar.gz
+-rw-rw-r-- 1 vagrant vagrant 101867460 Oct 29 18:50 alpine-orangepi-pc2-3.11.2-aarch64.tar.gz
 -rw-rw-r-- 1 vagrant vagrant       390 Oct 29 18:50 boot.cmd
 -rw-rw-r-- 1 vagrant vagrant       462 Oct 29 18:50 boot.scr
--rw-rw-r-- 1 vagrant vagrant    151902 Oct 29 18:19 config-4.19.80
+-rw-rw-r-- 1 vagrant vagrant    151902 Oct 29 18:19 config-4.19.91
 drwxrwxr-x 3 vagrant vagrant      4096 Oct 29 18:19 dtbs
 drwxrwxr-x 3 vagrant vagrant      4096 Oct 29 18:49 lib
 -rw-rw-r-- 1 vagrant vagrant     17440 Oct 29 18:49 sun50i-h5-orangepi-pc2.dtb
--rw-rw-r-- 1 vagrant vagrant    711136 Oct 29 18:03 u-boot-2019-10-29-18-01-44.bin
--rw-rw-r-- 1 vagrant vagrant  14047240 Oct 29 18:19 vmlinuz-4.19.80
+-rw-rw-r-- 1 vagrant vagrant    711136 Oct 29 18:03 u-boot-2019-12-28-16-05-17.bin
+-rw-rw-r-- 1 vagrant vagrant  14047240 Oct 29 18:19 vmlinuz-4.19.91
 ```
-Файл ```alpine-orangepi-pc2-3.10.3-aarch64.tar.gz``` можно скопировать и используя скрипт ```make-alpine-aarch64``` записать на SD карту. Скрипт ```make-alpine-aarch64``` принимает два параметра, второй параметр в формате ```sdX```
+Файл ```alpine-orangepi-pc2-3.11.2-aarch64.tar.gz``` можно скопировать и используя скрипт ```make-alpine-aarch64``` записать на SD карту. Скрипт ```make-alpine-aarch64``` принимает два параметра, второй параметр в формате ```sdX```
 ```shell
 work@work:~$ ./make-alpine-aarch64 
 ######## Укажите первым параметром архив с дистрибутивом
