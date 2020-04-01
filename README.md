@@ -2,9 +2,9 @@
 
 Создание Alpine Linux для Orange PI PC2
 
-Релиз Alpine Linux [3.11.2](https://github.com/gwvsol/Alpine-Linux-Orange-PC2/releases/tag/v3.11.2) для Orange PI PC2
+Релиз Alpine Linux [3.11.5](https://github.com/gwvsol/Alpine-Linux-Orange-PC2/releases/tag/v3.11.5) для Orange PI PC2
 
-ALPINE LINUX [3.11.2](https://alpinelinux.org/posts/Alpine-3.11.2-released.html) RELEASED
+ALPINE LINUX [3.11.5](https://alpinelinux.org/posts/Alpine-3.11.5-released.html) RELEASED
 ***
 
 ### Краткое описание
@@ -26,7 +26,7 @@ ALPINE LINUX [3.11.2](https://alpinelinux.org/posts/Alpine-3.11.2-released.html)
 * Исходный код ядра [Linux](https://cdn.kernel.org/pub/linux/kernel/)
 * Файлы ```initramfs``` и ```modloop``` из Alpine Linux - [Generic ARM Aarch64](https://alpinelinux.org/downloads/)
 
-На момент написания ```README``` версия ядра Linux (LTS) - ```4.19.91``` и версия Alpine Linux - ```3.11.2```
+На момент написания ```README``` версия ядра Linux (LTS) - ```5.4.28``` и версия Alpine Linux - ```3.11.5```
 
 ### Подготовка к сборке
 
@@ -36,7 +36,7 @@ git clone https://github.com/gwvsol/Alpine-Linux-Orange-PC2.git
 cd Alpine-Linux-Orange-PC2
 
 -rw-r--r-- 1 work work    116 окт 29 12:06 aarch64-linux-musl.sh
--rw-r--r-- 1 work work 151902 окт 29 12:11 config-4.19.91
+-rw-r--r-- 1 work work 151902 окт 29 12:11 config-5.4.28
 -rwxr-xr-x 1 work work   1630 окт 29 12:06 make-alpine-aarch64
 -rwxr-xr-x 1 work work   7941 окт 29 19:05 make-distr
 -rw-r--r-- 1 work work   1274 окт 29 12:06 README.md
@@ -52,14 +52,14 @@ cd Alpine-Linux-Orange-PC2
 
 Далее все действия происходят внутри работающей виртуальной машины
 
-Если необходимо собрать версию ядра отличающегося от ядра от ```4.19.91``` неоходимо внести измения в файл ```make-distr``` в переменные
+Если необходимо собрать версию ядра отличающегося от ядра от ```5.4.28``` неоходимо внести измения в файл ```make-distr``` в переменные
 
 ```shell
-KERNEL_BRANCH="v4.x"
-KERNEL_VERSION="4.19.91"
+KERNEL_BRANCH="v5.x"
+KERNEL_VERSION="5.4.28"
 ....
 ALPINE_V="3.11"
-ALPINE_C="2"
+ALPINE_C="5"
 ```
 а так же при необходимости раскомментировать строку ```#make menuconfig```
 
@@ -133,26 +133,26 @@ vagrant@VM06-Alpine-for-OrangePC2:~$ ls -l
 total 12
 drwxrwxr-x  4 vagrant vagrant 4096 Oct 29 18:50 alpine-aarch64
 drwxr-xr-x  2 vagrant vagrant 4096 Oct 29 18:01 conf
-drwxrwxr-x 26 vagrant vagrant 4096 Oct 29 18:44 linux-4.19.91
+drwxrwxr-x 26 vagrant vagrant 4096 Oct 29 18:44 linux-5.4.28
 ```
 В директории ```alpine-aarch64``` будет находится результат нашей сборки
 ```shell
 vagrant@VM06-Alpine-for-OrangePC2:~/alpine-aarch64$ ls -l
 total 198668
--rw-rw-r-- 1 vagrant vagrant   3043842 Oct 29 18:19 System.map-4.19.91
+-rw-rw-r-- 1 vagrant vagrant   3043842 Oct 29 18:19 System.map-5.4.28
 -rw-rw-r-- 1 vagrant vagrant  31696603 Oct 29 18:50 alpine-aarch64-initramfs
 -rw-r--r-- 1 vagrant vagrant  51867648 Oct 29 18:50 alpine-aarch64-modloop
--rw-rw-r-- 1 vagrant vagrant 101867460 Oct 29 18:50 alpine-orangepi-pc2-3.11.2-aarch64.tar.gz
+-rw-rw-r-- 1 vagrant vagrant 101867460 Oct 29 18:50 alpine-orangepi-pc2-3.11.5-aarch64.tar.gz
 -rw-rw-r-- 1 vagrant vagrant       390 Oct 29 18:50 boot.cmd
 -rw-rw-r-- 1 vagrant vagrant       462 Oct 29 18:50 boot.scr
--rw-rw-r-- 1 vagrant vagrant    151902 Oct 29 18:19 config-4.19.91
+-rw-rw-r-- 1 vagrant vagrant    151902 Oct 29 18:19 config-5.4.28
 drwxrwxr-x 3 vagrant vagrant      4096 Oct 29 18:19 dtbs
 drwxrwxr-x 3 vagrant vagrant      4096 Oct 29 18:49 lib
 -rw-rw-r-- 1 vagrant vagrant     17440 Oct 29 18:49 sun50i-h5-orangepi-pc2.dtb
--rw-rw-r-- 1 vagrant vagrant    711136 Oct 29 18:03 u-boot-2019-12-28-16-05-17.bin
--rw-rw-r-- 1 vagrant vagrant  14047240 Oct 29 18:19 vmlinuz-4.19.91
+-rw-rw-r-- 1 vagrant vagrant    711136 Oct 29 18:03 u-boot-2020-03-28-19-21-52.bin
+-rw-rw-r-- 1 vagrant vagrant  14047240 Oct 29 18:19 vmlinuz-5.4.28
 ```
-Файл ```alpine-orangepi-pc2-3.11.2-aarch64.tar.gz``` можно скопировать и используя скрипт ```make-alpine-aarch64``` записать на SD карту. Скрипт ```make-alpine-aarch64``` принимает два параметра, второй параметр в формате ```sdX```
+Файл ```alpine-orangepi-pc2-3.11.5-aarch64.tar.gz``` можно скопировать и используя скрипт ```make-alpine-aarch64``` записать на SD карту. Скрипт ```make-alpine-aarch64``` принимает два параметра, второй параметр в формате ```sdX```
 ```shell
 work@work:~$ ./make-alpine-aarch64 
 ######## Укажите первым параметром архив с дистрибутивом
@@ -162,7 +162,7 @@ work@work:~$ ./make-alpine-aarch64
 После чего SD карту можно установить в ```Orange Pi PC2``` и завершить установку Alpine Linux
 ````shell
 Welcome to Alpine Linux 3.11
-Kernel 4.19.91 on an aarch64 (/dev/ttyS0)
+Kernel 5.4.28 on an aarch64 (/dev/ttyS0)
 
 pc2 login: root
 Password: 
