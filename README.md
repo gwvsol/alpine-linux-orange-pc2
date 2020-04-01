@@ -15,7 +15,7 @@ ALPINE LINUX [3.11.5](https://alpinelinux.org/posts/Alpine-3.11.5-released.html)
 
 Для развертывания системы сборки используется [Virtual Box](https://www.virtualbox.org/wiki/Linux_Downloads) и [Vagrant](https://help.ubuntu.ru/wiki/vagrant). Создан Vagrantfile и набор скриптов для сборки [Alpine Linux](https://alpinelinux.org/). На виртуальной машине используется [Ubuntu 18.04 LTS (Bionic Beaver)](http://releases.ubuntu.com/18.04/)
 
-Во время развертывания виртуальной машины устанавливаются все необходимые пакеты, копируется скрипт для сборки ```make-distr```, файл ```aarch64-linux-musl.sh```, для установки переменных окружения компилятора ```Musl Cross Compiler``` и ```config-4.19.91``` для настройки ядра перед его сборкой. Компилятор ```Musl Cross Compiler``` для сборки загрузщика Uboot и ядра Linux не устанавливается, его необходимо будет собрать из исходников перед началом сборки Alpine Linux. Так же имеется скрипит ```make-alpine-aarch64``` упрощающий установку дистрибутива на SD карту
+Во время развертывания виртуальной машины устанавливаются все необходимые пакеты, копируется скрипт для сборки ```make-distr```, файл ```aarch64-linux-musl.sh```, для установки переменных окружения компилятора ```Musl Cross Compiler``` и ```config-5.4.28``` для настройки ядра перед его сборкой. Компилятор ```Musl Cross Compiler``` для сборки загрузщика Uboot и ядра Linux не устанавливается, его необходимо будет собрать из исходников перед началом сборки Alpine Linux. Так же имеется скрипит ```make-alpine-aarch64``` упрощающий установку дистрибутива на SD карту
 
 Иногда при развертывании виртуальной машины возникает ошибка ```Vagrant: * Unknown configuration section 'disksize'```. Для устранения ошибки ```vagrant plugin install vagrant-disksize```
 
