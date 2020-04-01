@@ -23,13 +23,13 @@ MUSL_AARCH="aarch64-linux-musl-"
 MUSL_CONF="config.mak"
 ###############################
 KERNEL_URL="https://cdn.kernel.org/pub/linux/kernel/"
-KERNEL_BRANCH="v4.x"
-KERNEL_VERSION="4.19.91"
+KERNEL_BRANCH="v5.x"
+KERNEL_VERSION="5.4.28"
 KERNEL="$KERNEL_URL/$KERNEL_BRANCH/linux-$KERNEL_VERSION.tar.xz"
 KERNEL_CONF="$WORK_DIR/conf/config-$KERNEL_VERSION"
 ###############################
 ALPINE_V="3.11"
-ALPINE_C="2"
+ALPINE_C="5"
 ALPINE_URL="http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_V/releases/aarch64/alpine-uboot-$ALPINE_V.$ALPINE_C-aarch64.tar.gz"
 ###############################
 
@@ -131,10 +131,10 @@ kernel () {
 }
 
 fs () {
-    cd $TEMP && mkdir mkdir -p {tmp,new,modloop,tmp-modloop/modules} && \
+    cd $TEMP && mkdir -p {tmp,new,modloop,tmp-modloop/modules} && \
     wget $ALPINE_URL && \
     tar -xf alpine-uboot-$ALPINE_V.$ALPINE_C-aarch64.tar.gz -C tmp/ && \
-    cp -a tmp/boot/initramfs* $TEMP/ cp -a tmp/boot/modloop* $TEMP/ && cp -a tmp/apks $DISTR/ && \
+    cp -a tmp/boot/initramfs* $TEMP/ && cp -a tmp/boot/modloop* $TEMP/ && cp -a tmp/apks $DISTR/ 
     cd new && gunzip -c ../initramfs-* | cpio -i && \
     rm -rf lib/modules/* && cp -a $DISTR/lib/modules/* lib/modules/ && \
     find . | cpio -H newc -o | gzip -9 > ../initramfs-new && cd .. && \
